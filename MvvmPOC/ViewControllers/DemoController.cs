@@ -44,31 +44,30 @@ namespace MvvmPOC.ViewControllers
         {
             base.ViewDidLoad();
 
-            //this.WhenActivated(disposable =>
-            //{
-            //this.Bind(ViewModel,
-            //vm => vm.Input1 ?? string.Empty,
-            //vc => vc.input1TextField.StringValue);
-            //.DisposeWith(disposable);
-
-            //this.OneWayBind(ViewModel,
-            //vm => vm.Product ?? string.Empty,
-            //vc => vc.productTextField.StringValue);
-            //.DisposeWith(disposable);
-            //});
-
             Observable.FromEventPattern<EventHandler, EventArgs>(
                 ev => input1TextField.Changed += ev,
                 ev => input1TextField.Changed -= ev)
             .Select(e => input1TextField.StringValue)
             .Subscribe(x => ViewModel.Input1 = x);
 
+            Observable.FromEventPattern<EventHandler, EventArgs>(
+                ev => input2TextField.Changed += ev,
+                ev => input2TextField.Changed -= ev)
+            .Select(e => input2TextField.StringValue)
+            .Subscribe(x => ViewModel.Input2 = x);
+
+            Observable.FromEventPattern<EventHandler, EventArgs>(
+                ev => multiplyButton.Activated += ev,
+                ev => multiplyButton.Activated -= ev)
+            .Subscribe(x => ViewModel.Concatenate.Execute());
+
             Observable.FromEventPattern<PropertyChangedEventHandler, PropertyChangedEventArgs>(
                 eh => eh.Invoke,
                 ev => ViewModel.PropertyChanged += ev,
                 ev => ViewModel.PropertyChanged -= ev)
-            .Where(e => e.EventArgs.PropertyName == nameof(DemoViewModel.Product))
-            .Select(e => ViewModel.Product)
+            .ObserveOn(RxApp.MainThreadScheduler)
+            .Where(e => e.EventArgs.PropertyName == nameof(DemoViewModel.Result))
+            .Select(e => ViewModel.Result)
             .Subscribe(x => productTextField.StringValue = x);
         }
 

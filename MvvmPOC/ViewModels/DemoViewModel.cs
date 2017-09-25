@@ -1,14 +1,16 @@
 ﻿using System;
 using System.ComponentModel;
+using System.Reactive;
 using System.Reactive.Linq;
+using System.Threading.Tasks;
 using System.Windows.Input;
 using ReactiveUI;
 
 namespace MvvmPOC.ViewModels
 {
-    public class DemoViewModel : BaseViewModel, IDisposable
+    public class DemoViewModel : BaseViewModel
     {
-        public ICommand Multiply { get; }
+        public ReactiveCommand<Unit, Unit> Concatenate { get; private set; }
 
         private string _input1;
         public string Input1
@@ -23,32 +25,29 @@ namespace MvvmPOC.ViewModels
             set => SetProperty(ref _input2, value);
         }
 
-        private string _product;
-        public string Product
+        private string _result;
+        public string Result
         {
-            get => _product;
-            private set => SetProperty(ref _product, value);
+            //get => _resultObservableHelper.Value;
+            get => _result;
+            set => SetProperty(ref _result, value);
         }
-
-
-        public string MultiplyErrors { get; }
-
-        private IDisposable _input1Subscription;
 
         public DemoViewModel()
         {
-            _input1Subscription = Observable.FromEventPattern<PropertyChangedEventHandler, PropertyChangedEventArgs>(
-                eh => eh.Invoke,
-                ev => this.PropertyChanged += ev,
-                ev => this.PropertyChanged -= ev)
-            .Where(e => e.EventArgs.PropertyName == nameof(Input1))
-            .Select(e => Input1)
-            .Subscribe(x => Product = x);
+            Concatenate = ReactiveCommand.CreateFromTask(async () =>
+            {
+                await Task.Run(() =>
+                {
+                    Result = ConcatenateString(Input1, Input2);
+                });
+            });
         }
 
-        public void Dispose()
+        private string ConcatenateString(string input1, string input2)
         {
-            _input1Subscription.Dispose();
+            return $"{input1}{input2}";
         }
+
     }
 }
