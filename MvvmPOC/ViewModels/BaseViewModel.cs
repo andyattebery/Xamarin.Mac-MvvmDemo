@@ -48,7 +48,7 @@ namespace MvvmPOC.ViewModels
             }
 
             storage = value;
-            OnPropertyChanged();
+            OnPropertyChanged(propertyName);
             return true;
         }
     }
